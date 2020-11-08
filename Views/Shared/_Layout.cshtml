@@ -1,0 +1,132 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Quizzle</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/css/album.css" />
+    <link rel="stylesheet" href="~/css/dashboard.css" />
+</head>
+<body>
+    <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
+        <div class="navbar-brand col-md-3 col-lg-2 mr-0 px-3">
+            <a asp-controller="Home" asp-action="Index"><img src="~/images/quizzle.png" width="98" height="30" alt="" loading="lazy"></a>
+        </div>
+
+        <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-toggle="collapse" data-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <input class="form-control form-control-dark w-100" type="text" id="buscar" placeholder="Pesquisar" aria-label="Search">
+        @if (Context.User.Identity.IsAuthenticated)
+        {
+            <ul class="navbar-nav px-3">
+                <li class="nav-item text-nowrap">
+                    <a class="nav-link" asp-controller="Perfil" asp-action="Logout">Sair</a>
+                </li>
+            </ul>
+        }
+        else
+        {
+            <ul class="navbar-nav px-3">
+                <li class="nav-item text-nowrap">
+                    <a class="nav-link" asp-controller="Perfil" asp-action="Login">Login</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav px-3">
+                <li class="nav-item text-nowrap">
+                    <a class="nav-link" asp-controller="Perfil" asp-action="Cadastrar">Cadastrar</a>
+                </li>
+            </ul>
+        }
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+                <div class="sidebar-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <!--Menu Usuário-->
+                        @if (Context.User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link active" href="#">
+                                    <span data-feather="home"></span>
+                                    @Context.User.Claims.FirstOrDefault(p => p.ValueType == "Nome").Value
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Criar" asp-action="Index">
+                                    <span data-feather="file"></span>
+                                    Meu Perfil
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="~/Perfil/@Context.User.Claims.FirstOrDefault(p => p.ValueType == "Id_Perfil").Value">
+                                    <span data-feather="shopping-cart"></span>
+                                    Meus Posts
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Perfil" asp-action="Logout">
+                                    <span data-feather="users"></span>
+                                    Sair
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link active" href="#">
+                                    <span data-feather="home"></span>
+                                    Anônimo
+                                </a>
+                            </li>
+                        }
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Criar" asp-action="Index">
+                                <span data-feather="bar-chart-2"></span>
+                                Criar Quiz
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Home" asp-action="Index">
+                                <span data-feather="bar-chart-2"></span>
+                                Todos os Quiz
+                            </a>
+                        </li>
+                    </ul>
+
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                        <span>Categorias</span>
+                    </h6>
+                    <ul class="nav flex-column mb-2">
+                        @await Component.InvokeAsync(nameof(Quizzle.Controllers.menuCategoriasController))
+                    </ul>
+                </div>
+            </nav>
+
+            <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/dashboard.js"></script>
+    @RenderSection("Scripts", required: false)
+    <script>
+        const buscar = document.getElementById("buscar");
+
+        buscar.addEventListener("keypress", function (e) {
+            if (e.keyCode == 13) {
+                e.preventDefault();
+                window.location = window.location.origin + "/Pesquisar/" + buscar.value;
+            }
+        });
+    </script>
+</body>
+</html>

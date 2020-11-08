@@ -1,0 +1,170 @@
+﻿@model Quizzle.Models.QuizzesViewModel
+
+@{
+    string display = "";
+    int qtdAlternativa = 0;
+
+    if (Model.Passo == 0)
+        display = "none";
+    else
+        display = "inline";
+
+    @for (int i = 0; i < Model.Perguntas.Count; i++)
+    {
+        if (Model.Passo == i)
+        {
+            qtdAlternativa = Model.Perguntas[i].Alternativas.Count;
+        }
+    }
+}
+
+<form id="JogarQuiz" role="main" class="container" asp-action="Jogar" enctype="multipart/form-data">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    @if (Model.Passo == 0)
+    {
+        <div id="divJogar1">
+            <div class="my-3 p-3 bg-white rounded shadow-sm">
+                <h5 class="border-bottom border-gray pb-2 mb-0">Jogar</h5>
+
+                <div class="pt-3">
+                    <div class="card mb-3">
+                        <img src="@Model.Imagem" class="imgCapa mx-auto" alt="@Model.Titulo">
+                        <div class="card-body">
+                            <h5 class="card-title mx-auto">@Model.Titulo</h5>
+                            <p class="card-text mx-auto">@Model.Descricao</p>
+                            <p class="card-text mx-auto"><small class="text-muted">@Model.DataCadastro</small></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="my-3 p-3 bg-white rounded shadow-sm">
+                    <small class="d-block text-right mt-3">
+                        <button type="button" id="iniciar" class="btn btn-primary btn-lg btn-block">Iniciar</button>
+                    </small>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div id="divJogar2" style="display: @display;">
+        <div class="my-3 p-3 bg-white rounded shadow-sm">
+            <h5 class="border-bottom border-gray pb-2 mb-0">Jogar</h5>
+            <div class="pt-3">
+                <div class="card">
+                    <h6 class="card-header">Pergunta</h6>
+                    <div class="card-body">
+                        <ul class="nav nav-tabs justify-content-center">
+                            @for (int i = 0; i < Model.Perguntas.Count; i++)
+                            {
+                                if (Model.Passo == i)
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link active" href="#">@(i+1)</a>
+                                    </li>
+                                }
+                                else
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link disabled" tabindex="-1" aria-disabled="true">@(i+1)</a>
+                                    </li>
+                                }
+                            }
+                        </ul>
+
+                        @for (int i = 0; i < Model.Perguntas.Count; i++)
+                        {
+                            <div class="media text-muted pt-3">
+                                @if (Model.Passo == i)
+                                {
+                                    @Model.Perguntas[i].Titulo
+                                }
+                            </div>
+                        }
+
+                    </div>
+                </div>
+            </div>
+
+            @for (int i = 0; i < Model.Perguntas.Count; i++)
+            {
+                if (Model.Passo == i)
+                {
+                    <input type="text" class="form-control-file" value="@Model.Perguntas[i].Id_Pergunta" id="idPergunta" hidden="hidden">
+                    for (int y = 0; y < Model.Perguntas[i].Alternativas.Count; y++)
+                    {
+                        <main class="media text-muted pt-3">
+                            <div class="media-body mb-0 small lh-125 border-bottom border-gray">
+                                <div class="d-flex justify-content-between align-items-center w-100">
+
+                                    <div class="input-group mb-3">
+                                        <div class="input-group-prepend">
+                                            <div class="input-group-text">
+                                                <input type="radio" aria-label="Checkbox for following text input" id="idAlternativa_@y" name="exampleRadios" value="@Model.Perguntas[i].Alternativas[y].Id_Alternativa" required>
+                                            </div>
+                                        </div>
+                                        <input type="text" class="form-control bg-white" value="@Model.Perguntas[i].Alternativas[y].Id_Alternativa" aria-label="Text input with checkbox" disabled="">
+                                    </div>
+                                </div>
+                            </div>
+                        </main>
+                    }
+                }
+                else if (Model.Passo >= Model.Perguntas.Count)
+                {
+                    <div class="modal-body">
+                        Você acertou @Model.Pontuacao de @Model.Perguntas.Count
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" onclick="home()">Voltar para Home</button>
+                    </div>
+                    break;
+                }
+            }
+
+        </div>
+    </div>
+    <small class="d-block text-right mt-3 btn-group btn-group-toggle">
+        @for (int i = 0; i < Model.Perguntas.Count; i++)
+        {
+            if (Model.Passo == i)
+            {
+                <button type="button" id="btnAvancar" class="btn btn-secondary btn-sm" onclick="avancar()" style="display: @display;">Avançar</button>
+            }
+        }
+    </small>
+
+</form>
+<script>
+    const iniciar = document.getElementById("iniciar");
+    const divJogar1 = document.getElementById("divJogar1");
+    const divJogar2 = document.getElementById("divJogar2");
+    const btnAvancar = document.getElementById("btnAvancar");
+
+    iniciar.addEventListener("click", function () {
+        divJogar1.style.display = 'none';
+        divJogar2.style.display = 'inline';
+        btnAvancar.style.display = 'inline';
+    });
+
+    function avancar() {
+        let id_Perg = $('#idPergunta').val();
+        let id_Alt = 0;
+        for (var i = 0; i < @qtdAlternativa; i++) {
+            if ($('#idAlternativa_'+i).is(':checked')) {
+                id_Alt = i + 1;
+            }
+        }
+        window.location = window.location.origin + "/Avancar/" + id_Perg + "/" + id_Alt;
+    }
+
+    function home() {
+        window.location = window.location.origin;
+    }
+</script>
+<style>
+    .imgCapa {
+        object-fit: cover;
+        height: 400px;
+        width: 400px;
+    }
+</style>

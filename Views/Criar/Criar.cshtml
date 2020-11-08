@@ -1,0 +1,353 @@
+﻿@model Quizzle.Models.QuizzesViewModel
+
+@{
+    var Categorias = ViewData["Categorias"] as List<CategoriasViewModel>;
+}
+
+<form id="CriarQuiz" role="main" class="container" asp-action="Criar" enctype="multipart/form-data">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div id="divCriar">
+        <div class="my-3 p-3 bg-white rounded shadow-sm">
+            <h5 class="border-bottom border-gray pb-2 mb-0">Criar Quiz</h5>
+
+            <div class="pt-3">
+                <div class="card">
+                    <h6 class="card-header">Capa</h6>
+                    <div class="card-body">
+                        <p class="text-muted mb-0"><small><strong>Título: </strong>mínimo de 15 caracteres</small></p>
+                        <p class="text-muted mb-0"><small><strong>Capa: </strong>enviar imagem da capa</small></p>
+                        <p class="text-muted mb-0"><small><strong>Descrição: </strong>mínimo de 15 caracteres</small></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-3 border-bottom">
+                <div class="row">
+                    <div class="col-sm-4">
+                        <img src="~/images/quiz/exemple.jpg" id="addImagem" class="card-img mb-2 imgCapa" alt="...">
+                        <input type="file" class="form-control-file" id="imagem" asp-for="ImagemFile" hidden="hidden" accept="image/jpeg,image/jpg">
+                    </div>
+                    <div class="col">
+                        <input asp-for="Titulo" type="text" class="form-control mb-2" id="titulo" placeholder="Titulo" required autofocus />
+                        <textarea asp-for="Descricao" class="form-control mb-2" id="descricao" placeholder="Descrição..." rows="3" required></textarea>
+                        <select asp-for="Categoria.Id_Categoria" class="form-control mb-2" id="categorias">
+                            @foreach (var item in Categorias)
+                            {
+                                <option value="@item.Id_Categoria">@item.Descricao</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+
+            <!--<div class="media">
+                <img src="~/images/quiz/exemple.jpg" class="mr-3" alt="...">
+                <div class="media-body">
+                    <div class="form-group mt-0">
+                        <input type="text" class="form-control" id="titulo" placeholder="Titulo">
+                    </div>
+                    <div class="form-group mt-0">
+                        <textarea class="form-control" id="descricao" placeholder="Descrição..." rows="6"></textarea>
+                    </div>
+                </div>
+            </div>-->
+
+            <div class="pt-3">
+                <div class="card">
+                    <h6 class="card-header">Perguntas</h6>
+                    <div class="card-body">
+                        <p class="text-muted mb-0"><small><strong>Perguntas: </strong>criar no mínimo 3</small></p>
+                        <p class="text-muted mb-0"><small><strong>Perguntas: </strong>criar no máximo 5</small></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="my-3 p-3 bg-white rounded shadow-sm">
+
+                @for (int i = 0; i < Model.Perguntas.Count; i++)
+                {
+                    <div class="media text-muted" id="Perguntas_@i" style="display: none;">
+                        <div class="media-body small lh-125 border-bottom border-gray">
+                            <div class="d-flex justify-content-between align-items-center w-100">
+                                <input class="text-muted font-weight-bold" style="border: none; background: transparent;" id="TituloPergunta_@i" asp-for="@Model.Perguntas[i].Titulo" disabled="disabled" />
+                                <a id="RemoverPergunta_@i" onclick="removerPergunta(this)" href="#">Remover</a>
+                            </div>
+                            @for (int y = 0; y < Model.Perguntas[i].Alternativas.Count; y++)
+                            {
+                                <input type="hidden" class="d-block" id="Alternativa_@i-@y" style="border: none; background: transparent;" asp-for="@Model.Perguntas[i].Alternativas[y].Alternativa" disabled="disabled" />
+                            }
+                        </div>
+                    </div>
+                }
+
+                <small class="d-block text-right mt-3">
+                    <button type="button" id="adcPergunta" class="btn btn-secondary btn-sm">Adicionar Pergunta</button>
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <div style="display: none;" id="divPerguntas">
+        <div class="my-3 p-3 bg-white rounded shadow-sm">
+            <h5 class="border-bottom border-gray pb-2 mb-0">Adicionar Pergunta</h5>
+
+            <div class="pt-3">
+                <div class="card">
+                    <h6 class="card-header">Pergunta</h6>
+                    <div class="card-body">
+                        <p class="text-muted mb-0"><small><strong>Pergunta: </strong>mínimo de 6 caracteres</small></p>
+                        <p class="text-muted mb-0"><small><strong>Alternativas: </strong>nenhuma em branco</small></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="media text-muted pt-3">
+                <textarea class="form-control" id="tituloPergunta" placeholder="Pergunta" rows="2"></textarea>
+            </div>
+
+            <main class="media text-muted pt-3">
+                <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
+                    <div class="d-flex justify-content-between align-items-center w-100">
+                        <img src="~/images/quiz/verifica.png" class="mr-3" alt="..." />
+                        <input type="text" class="form-control" id="PerguntaDivAlternativaTitulo_1" placeholder="Alternativa" />
+                    </div>
+                </div>
+            </main>
+            <main class="media text-muted pt-3">
+                <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
+                    <div class="d-flex justify-content-between align-items-center w-100">
+                        <img src="~/images/quiz/perto.png" class="mr-3" alt="..." />
+                        <input type="text" class="form-control" id="PerguntaDivAlternativaTitulo_2" placeholder="Alternativa" />
+                    </div>
+                </div>
+            </main>
+
+            <div id="AlternativasOp">
+
+            </div>
+            <small class="d-block text-right mt-3 btn-group btn-group-toggle" data-toggle="buttons">
+                <button type="button" id="adcPerguntaDivAlternativa" class="btn btn-secondary btn-sm">Adicionar Alternativa</button>
+            </small>
+
+            <small class="d-block text-right mt-3 btn-group btn-group-toggle" data-toggle="buttons">
+                <button type="button" id="canPerguntaDivPergunta" class="btn btn-secondary btn-sm">Cancelar</button>
+                <button type="button" id="adcPerguntaDivPergunta" class="btn btn-secondary btn-sm">Adicionar Pergunta</button>
+            </small>
+        </div>
+    </div>
+    <small class="d-block text-right mt-3 btn-group btn-group-toggle">
+        <button type="button" id="concluir" class="btn btn-secondary btn-sm">Concluir</button>
+    </small>
+</form>
+
+<script type="text/javascript">
+    const divCriar = document.getElementById("divCriar");
+    const divPerguntas = document.getElementById("divPerguntas");
+    const adcPergunta = document.getElementById("adcPergunta");
+    const canPerguntaDivPergunta = document.getElementById("canPerguntaDivPergunta");
+    const adcPerguntaDivPergunta = document.getElementById("adcPerguntaDivPergunta");
+    const adcPerguntaDivAlternativa = document.getElementById("adcPerguntaDivAlternativa");
+    const concluir = document.getElementById("concluir");
+    const imgFile = document.getElementById("addImagem");
+    const fileBtn = document.getElementById("imagem");
+
+    adcPergunta.addEventListener("click", function () {
+        for (var i = 0; i < 10; i++) {
+            if (document.getElementById("Perguntas_" + 0).style.display.value != 'none') {
+                check = true;
+            }
+        }
+
+        if (check) {
+            divCriar.style.display = 'none';
+            divPerguntas.style.display = 'inline';
+        }
+    });
+
+    canPerguntaDivPergunta.addEventListener("click", function () {
+        divPerguntas.style.display = 'none';
+        divCriar.style.display = 'inline';
+
+        $('#tituloPergunta').val("");
+        $('#PerguntaDivAlternativaTitulo_1').val("");
+        $('#PerguntaDivAlternativaTitulo_2').val("");
+        removerAlternativa($("button[class*='close']"));
+    });
+
+    adcPerguntaDivPergunta.addEventListener("click", function () {
+        let tituloPergunta = $('#tituloPergunta').val();
+
+        if (tituloPergunta == "") {
+            alert("Digite uma pergunta");
+            $('#tituloPergunta').focus();
+            return false;
+        }
+
+        let alternativas = [];
+        for (let i = 1; i <= 5; i++) {
+            if (typeof $('#PerguntaDivAlternativaTitulo_' + i).val() != typeof undefined) {
+                if ($('#PerguntaDivAlternativaTitulo_' + i).val() != "") {
+                    alternativas.push($('#PerguntaDivAlternativaTitulo_' + i).val());
+                }
+            }
+        }
+
+        if (alternativas.length < 2) {
+            alert("Digite pelo menos duas alternativas para a pergunta");
+            return false;
+        }
+
+        let countInputDisp = 0;
+        for (var i = 0; i < 10; i++) {
+            if (document.getElementById("Perguntas_" + i).style.display == 'none') {
+                document.getElementById("Perguntas_" + i).style.display = 'inline';
+                $("#TituloPergunta_" + i).val(tituloPergunta);
+
+                for (var y = 0; y < alternativas.length; y++) {
+                    document.getElementById("Alternativa_" + i + "-" + y).type = "text";
+                    $("#Alternativa_" + i + "-" + y).val(alternativas[y]);
+                }
+                countInputDisp = countInputDisp + 1;
+                break;
+            } else {
+                countInputDisp = countInputDisp + 1;
+            }
+        }
+
+        if (countInputDisp == 10) {
+            document.getElementById("adcPergunta").disabled = true;
+        }
+
+        divPerguntas.style.display = 'none';
+        divCriar.style.display = 'inline';
+
+        $('#tituloPergunta').val("");
+        $('#PerguntaDivAlternativaTitulo_1').val("");
+        $('#PerguntaDivAlternativaTitulo_2').val("");
+        removerAlternativa($("button[class*='close']"));
+    });
+
+    adcPerguntaDivAlternativa.addEventListener("click", function () {
+        qtdAlt = $("div[class*='media-body pb-3 mb-0 small lh-125 border-bottom border-gray']").length;
+        if (qtdAlt < 5) {
+            qtdAlt = qtdAlt + 1;
+            var input = '<main class="media text-muted pt-3"> <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray"> <div class="d-flex justify-content-between align-items-center w-100"> <img src="/images/quiz/perto.png" class="mr-3" alt="..." /> <input type="text" class="form-control" id="PerguntaDivAlternativaTitulo_' + qtdAlt + '" placeholder="Alternativa" /> <button type="button" class="close" onclick="removerAlternativa(this)" aria-label="Close"> <span aria-hidden="true">&times;</span> </button> </div> </div> </main>';
+
+            $('#AlternativasOp').append(input);
+
+            if (qtdAlt == 5) {
+                adcPerguntaDivAlternativa.disabled = true;
+            }
+        }
+    });
+
+    concluir.addEventListener("click", function () {
+        let titulo = $('#titulo').val();
+
+        if (titulo == "") {
+            alert("Digite um titulo");
+            $('#titulo').focus();
+            return false;
+        }
+
+        let descricao = $('#descricao').val();
+
+        if (descricao == "") {
+            alert("Digite uma descrição");
+            $('#descricao').focus();
+            return false;
+        }
+
+        var countPerg = 0;
+        for (var i = 0; i < 10; i++) {
+            if (document.getElementById("Perguntas_" + i).style.display != 'none') {
+                countPerg = countPerg + 1;
+            }
+        }
+
+        if (countPerg < 3) {
+            alert("É necessário ter no minimo 3 perguntas");
+            return false;
+        }
+
+        if (document.getElementById("imagem").files.length == 0) {
+            alert("É necessário adicionar uma imagem");
+            return false;
+        }
+
+        for (var i = 0; i < 10; i++) {
+            if (document.getElementById("Perguntas_" + i).style.display != 'none') {
+                $("#TituloPergunta_" + i).prop('disabled', false);
+
+                for (var y = 0; y < 10; y++) {
+                    $("#Alternativa_" + i + "-" + y).prop('disabled', false);
+                }
+            }
+        }
+
+        document.getElementById("CriarQuiz").submit();
+    });
+
+    imgFile.addEventListener("click", function () {
+        fileBtn.click();
+    });
+
+    fileBtn.addEventListener("change", function () {
+        const file = this.files[0];
+
+        imgFile.style.display = null;
+        imgFile.setAttribute("src", "");
+
+        if (file) {
+            const reader = new FileReader();
+
+            imgFile.style.display = "block";
+
+            reader.addEventListener("load", function () {
+                imgFile.setAttribute("src", this.result);
+            });
+
+            reader.readAsDataURL(file);
+        } else {
+            imgFile.style.display = null;
+            imgFile.setAttribute("src", "");
+        }
+    });
+
+    function removerPergunta(elemnt) {
+        var idPergunta = (elemnt.id).split('_');
+
+        const divPerguntas = document.getElementById("Perguntas_" + idPergunta[1]);
+        const inpPerguntas = document.getElementById("TituloPergunta_" + idPergunta[1]);
+        divPerguntas.style.display = 'none';
+        inpPerguntas.value = '';
+
+        document.getElementById("adcPergunta").disabled = false;
+
+        for (var i = 0; i < 5; i++) {
+            document.getElementById("Alternativa_" + idPergunta + "-" + i).value = '';
+        }
+    }
+
+    function removerAlternativa(elemnt) {
+        $(elemnt).closest('main').remove();
+        document.getElementById("adcPerguntaDivAlternativa").disabled = false;
+    }
+</script>
+
+<style>
+    .media-body {
+        -ms-flex: none;
+    }
+    @@media only screen and (max-width: 882px) {
+        .col-sm-4 {
+            margin: 10px;
+        }
+    }
+    .imgCapa {
+        cursor: pointer;
+        object-fit: cover;
+        height: 219.391px;
+    }
+</style>

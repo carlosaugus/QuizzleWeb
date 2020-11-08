@@ -1,0 +1,11 @@
+﻿@model List<Quizzle.Models.CategoriasViewModel>
+
+@foreach (var item in Model)
+{
+    <li class="nav-item">
+        <a class="nav-link" href="~/Categoria/@item.Id_Categoria">
+            <span data-feather="file-text"></span>
+            @item.Descricao
+        </a>
+    </li>
+}
